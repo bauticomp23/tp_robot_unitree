@@ -40,7 +40,47 @@ def comando_es_valido(comando):
       - que el tiempo no sea negativo
     """
     # TU CODIGO ACA
-    pass
+    
+    
+def comando_es_valido(comando):
+    if not isinstance(comando, tuple) or len(comando) == 0:
+        return False
+
+    accion = comando[0]
+
+    if accion == "avanzar" or accion == "girar":
+        if len(comando) != 3:
+            return False
+
+        velocidad = comando[1]
+        tiempo = comando[2]
+
+        if isinstance(velocidad, bool) or not isinstance(velocidad, (int, float)):
+            return False
+
+        if isinstance(tiempo, bool) or not isinstance(tiempo, (int, float)):
+            return False
+
+        if tiempo < 0:
+            return False
+
+        if accion == "avanzar" and abs(velocidad) > 0.20:
+            return False
+
+        if accion == "girar" and abs(velocidad) > 0.50:
+            return False
+
+        if tiempo > 10:
+            return False
+
+        return True
+
+    elif accion == "detenerse" or accion == "saludar":
+        return len(comando) == 1
+
+    return False
+
+
 
 
 # =====================================================================
@@ -61,7 +101,27 @@ def ejecutar_comando(robot, comando):
     Eso llega como un ErrorDeSeguridad y conviene atraparlo.
     """
     # TU CODIGO ACA
-    pass
+    
+    if not comando_es_valido(comando):
+        return "Comando rechazado: formato invalido"
+
+    accion = comando[0]
+
+    try:
+        if accion == "avanzar":
+            robot.avanzar(velocidad=comando[1], tiempo=comando[2])
+        elif accion == "girar":
+            robot.girar(velocidad=comando[1], tiempo=comando[2])
+        elif accion == "detenerse":
+            robot.detenerse()
+        elif accion == "saludar":
+            robot.saludar()
+
+        return "Comando ejecutado correctamente"
+
+    except ErrorDeSeguridad as error:
+        return f"Comando rechazado por seguridad: {error}"
+
 
 
 # =====================================================================
@@ -78,7 +138,15 @@ def ejecutar_mision(robot, mision, historial):
     Un comando invalido NO tiene que cortar la mision.
     """
     # TU CODIGO ACA
-    pass
+    
+    for comando in mision:
+        resultado = ejecutar_comando(robot, comando)
+
+        historial.append({
+            "comando": comando,
+            "resultado": resultado
+        })
+
 
 
 # =====================================================================
@@ -93,7 +161,28 @@ def generar_reporte(historial):
       - cual fue el motivo de cada rechazo
     """
     # TU CODIGO ACA
-    pass
+    
+    ejecutados = 0
+    rechazados = 0
+
+    print("\n===== REPORTE DE LA MISION =====")
+
+    for registro in historial:
+        resultado = registro["resultado"]
+        print(f"Comando: {registro['comando']}")
+        print(f"Resultado: {resultado}")
+
+        if resultado == "Comando ejecutado correctamente":
+            ejecutados += 1
+        else:
+            rechazados += 1
+            print(f"Motivo del rechazo: {resultado}")
+
+        print("------------------------------")
+
+    print(f"Comandos ejecutados correctamente: {ejecutados}")
+    print(f"Comandos rechazados: {rechazados}")
+
 
 
 # =====================================================================
